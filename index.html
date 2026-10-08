@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>CareConnect</title>
+
+<style>
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+  font-family:Arial,sans-serif
+}
+
+body{
+  background:#f4f7fb;
+  color:#172033;
+  min-height:100vh
+}
+
+.header{
+  background:#fff;
+  padding:20px 16px 15px;
+  text-align:center;
+  border-bottom:1px solid #e3e8ef
+}
+
+.header h1{
+  font-size:28px;
+  font-weight:800;
+  color:#173b67
+}
+
+.header p{
+  margin-top:5px;
+  color:#687386;
+  font-size:14px
+}
+
+.status{
+  margin:14px 15px;
+  padding:11px;
+  border-radius:12px;
+  background:#e8f8ef;
+  color:#14733d;
+  font-weight:bold;
+  text-align:center;
+  font-size:14px
+}
+
+.dot{
+  display:inline-block;
+  width:9px;
+  height:9px;
+  background:#20a957;
+  border-radius:50%;
+  margin-right:6px
+}
+
+.instruction{
+  text-align:center;
+  padding:4px 20px 14px
+}
+
+.instruction h2{
+  font-size:19px;
+  margin-bottom:5px
+}
+
+.instruction p{
+  font-size:13px;
+  color:#707b8d
+}
+
+.commands{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  padding:0 15px
+}
+
+.command{
+  background:white;
+  border:3px solid transparent;
+  border-radius:18px;
+  min-height:120px;
+  padding:12px 7px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  box-shadow:0 3px 10px rgba(0,0,0,.06);
+  transition:.15s
+}
+
+.icon{
+  font-size:36px;
+  margin-bottom:7px
+}
+
+.title{
+  font-size:15px;
+  font-weight:800;
+  text-align:center
+}
+
+.subtitle{
+  font-size:10px;
+  color:#7b8493;
+  margin-top:4px;
+  text-align:center
+}
+
+.command.selected{
+  border-color:#2878d4;
+  background:#eaf4ff;
+  transform:scale(1.02);
+  box-shadow:0 0 0 3px rgba(40,120,212,.15)
+}
+
+.command.emergency{
+  background:#fff0f0
+}
+
+.command.emergency.selected{
+  border-color:#e53935;
+  background:#ffe1e1
+}
+
+.selection{
+  margin:16px 15px 10px;
+  padding:14px;
+  background:#fff;
+  border-radius:16px;
+  box-shadow:0 3px 10px rgba(0,0,0,.06)
+}
+
+.selection-label{
+  font-size:11px;
+  color:#737d8d;
+  text-transform:uppercase;
+  font-weight:bold
+}
+
+.selected-name{
+  font-size:19px;
+  font-weight:800;
+  margin-top:4px;
+  color:#173b67
+}
+
+.progress-bg{
+  height:10px;
+  background:#e5e9ef;
+  border-radius:10px;
+  margin-top:11px;
+  overflow:hidden
+}
+
+.progress{
+  height:100%;
+  width:0;
+  background:#2878d4;
+  border-radius:10px
+}
+
+.timer{
+  text-align:right;
+  margin-top:5px;
+  font-size:12px;
+  color:#707b8d
+}
+
+.message{
+  display:none;
+  margin:10px 15px 20px;
+  padding:14px;
+  background:#e8f8ef;
+  color:#14733d;
+  border-radius:14px;
+  text-align:center;
+  font-weight:bold
+}
+
+.reset{
+  display:none;
+  margin:0 auto 20px;
+  border:0;
+  border-radius:10px;
+  padding:9px 18px;
+  background:#173b67;
+  color:white;
+  font-weight:bold
+}
+
+@media(min-width:600px){
+  .commands,.selection,.status,.message{
+    max-width:600px;
+    margin-left:auto;
+    margin-right:auto
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  <h1>CareConnect</h1>
+  <p>Assistive Communication System</p>
+</div>
+
+<div class="status">
+  <span class="dot"></span>
+  ESP32 CONNECTED
+</div>
+
+<div class="instruction">
+  <h2>How can we help you?</h2>
+  <p>Move the cursor using your movement</p>
+</div>
+
+<div class="commands">
+
+<div class="command selected" data-command="Water">
+  <div class="icon">💧</div>
+  <div class="title">I NEED WATER</div>
+  <div class="subtitle">Water please</div>
+</div>
+
+<div class="command" data-command="Food">
+  <div class="icon">🍽️</div>
+  <div class="title">I NEED FOOD</div>
+  <div class="subtitle">Food please</div>
+</div>
+
+<div class="command" data-command="Washroom">
+  <div class="icon">🚻</div>
+  <div class="title">WASHROOM</div>
+  <div class="subtitle">I need assistance</div>
+</div>
+
+<div class="command" data-command="Medicine">
+  <div class="icon">💊</div>
+  <div class="title">MEDICINE</div>
+  <div class="subtitle">I need my medicine</div>
+</div>
+
+<div class="command" data-command="Medical Help">
+  <div class="icon">🏥</div>
+  <div class="title">MEDICAL HELP</div>
+  <div class="subtitle">I need assistance</div>
+</div>
+
+<div class="command emergency" data-command="Emergency Help">
+  <div class="icon">🆘</div>
+  <div class="title">HELP ME</div>
+  <div class="subtitle">Urgent assistance</div>
+</div>
+
+<div class="command" data-command="Change Position">
+  <div class="icon">🛏️</div>
+  <div class="title">CHANGE POSITION</div>
+  <div class="subtitle">Reposition me</div>
+</div>
+
+<div class="command" data-command="Call Caregiver">
+  <div class="icon">📞</div>
+  <div class="title">CALL CAREGIVER</div>
+  <div class="subtitle">Please come here</div>
+</div>
+
+</div>
+
+<div class="selection">
+
+  <div class="selection-label">Currently Selected</div>
+
+  <div class="selected-name" id="selectedName">
+    💧 I NEED WATER
+  </div>
+
+  <div class="progress-bg">
+    <div class="progress" id="progress"></div>
+  </div>
+
+  <div class="timer" id="timer">
+    Hold for 2 seconds to select
+  </div>
+
+</div>
+
+<div class="message" id="message">
+  ✓ REQUEST SENT
+</div>
+
+<button class="reset" id="reset">
+  Select another command
+</button>
+
+<script>
+
+const commands = document.querySelectorAll(".command");
+
+const selectedName =
+document.getElementById("selectedName");
+
+const progress =
+document.getElementById("progress");
+
+const timer =
+document.getElementById("timer");
+
+const message =
+document.getElementById("message");
+
+const reset =
+document.getElementById("reset");
+
+let selected = commands[0];
+
+let start = performance.now();
+
+let activated = false;
+
+const HOLD = 2000;
+
+
+function selectCommand(c){
+
+  if(activated) return;
+
+  commands.forEach(x =>
+    x.classList.remove("selected")
+  );
+
+  c.classList.add("selected");
+
+  selected = c;
+
+  selectedName.textContent =
+    c.querySelector(".icon").textContent +
+    " " +
+    c.querySelector(".title").textContent;
+
+  start = performance.now();
+
+  progress.style.width = "0%";
+
+  timer.textContent =
+    "Hold for 2 seconds to select";
+
+  message.style.display = "none";
+}
+
+
+commands.forEach(c => {
+
+  c.addEventListener("click", () => {
+    selectCommand(c);
+  });
+
+});
+
+
+function loop(now){
+
+  if(!activated){
+
+    const elapsed = now - start;
+
+    const pct =
+      Math.min(elapsed / HOLD * 100,100);
+
+    progress.style.width = pct + "%";
+
+
+    if(elapsed < HOLD){
+
+      timer.textContent =
+        "Hold for " +
+        ((HOLD-elapsed)/1000).toFixed(1) +
+        " seconds";
+
+    }
+
+    else{
+
+      activated = true;
+
+      timer.textContent =
+        "Command activated ✓";
+
+      message.textContent =
+        "✓ " +
+        selected.dataset.command.toUpperCase() +
+        " REQUEST SENT";
+
+      message.style.display = "block";
+
+      reset.style.display = "block";
+    }
+
+  }
+
+  requestAnimationFrame(loop);
+}
+
+
+reset.addEventListener("click", () => {
+
+  activated = false;
+
+  reset.style.display = "none";
+
+  selectCommand(selected);
+
+});
+
+
+requestAnimationFrame(loop);
+
+</script>
+
+</body>
+  </html>
